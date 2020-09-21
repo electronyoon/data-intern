@@ -120,8 +120,6 @@ def interpretPopupResult(addinfo_dict):
     return(addinfo_dict)
 
 def naverSearch(dict, address):
-    driver.get('http://map.naver.com/')
-    driver.implicitly_wait(3)
     driver.find_element_by_xpath('''//div[@class="input_box"]/input''').clear()
     driver.find_element_by_xpath('''//div[@class="input_box"]/input''').send_keys(address)
     driver.find_element_by_xpath('''//div[@class="input_box"]/input''').send_keys(Keys.RETURN)
@@ -163,6 +161,8 @@ data_list['seereal_result'] = []
 
 
 for given_addr in givenaddr_list:
+    driver.get('http://map.naver.com/')
+    driver.implicitly_wait(3)
     naverSearch(data_list, given_addr)
 
 # for given_addr in givenaddr_list:
