@@ -1,3 +1,5 @@
+import ctypes
+
 from urllib.request import urlopen
 from urllib.request import Request
 from urllib import parse
@@ -7,21 +9,6 @@ import pandas as pd
 from selenium import webdriver
 
 import freenote as fn
-
-# driver.get('http://kras.seoul.go.kr/land_info/info/baseInfo/baseInfo.do')
-
-# dataframe_result = fn.LandInfoStructure.dataframe_result
-# address = "서울특별시 종로구 당주동 160"
-
-# d = fn.StringHandler.addressToDict(address)
-# print(d)
-# r = fn.Action.isplSearch(driver, d)
-
-# # address_pieces = fn.StringHandler.addressToDict(address)
-# # fn.Action.isplSearch(driver, )
-# # address_ispl_info = fn.Action.isplPopupCheck(driver, d)
-# # d = fn.Action.isplVerify(address, d)
-# print(r)
 
 # def naverSearch(dict):
 #     driver.get('http://map.naver.com/')
@@ -59,47 +46,63 @@ import freenote as fn
 
 
 
+class TaskManager (fn.LandInfoStructure, fn.Action):
+    def __init__(self):
+        super().__init__()
+
+    print("loaded!")
+
+    def print():
+        print(self.__class__.dataframe_result)
 
 
-
-# # try:
-# #     element = WebDriverWait(driver, 10).until(
-# #         EC.presence_of_element_located((By.XPATH, '''//div[@class="summary_area"]'''))
-# #     )
-# # finally:
+    # def setWebdrive():
+    #     driver = webdriver.Chrome(executable_path=r'C:\chromedriver.exe')
+    #     dataframe_tobeappended['driver'] = driver
     
-# #     driver.quit()
+    # def setPandas():
+    #     addr_column = "A"
+    #     addr_to_num = sum([v*26**(len(addr_column)-i-1) for i, v in enumerate([ord(s)-64 for s in addr_column])])-1
+    #     data = pd.read_excel(r'C:\Users\user\Desktop\temp.xlsx', header=None)
+    #     df = data.iloc[:,addr_to_num]
+    #     address_list = df.values.tolist()
+    
+    # def executeTasks():
+    #     for address in address_list:
+    #         temp = dataframe_tobeappended
+    #         temp['original_address'] = address
+    #         temp = fn.StringHandler.addressToDict(temp)
+    #         temp = fn.Action.isplSearchAndAlert(temp)
+    #         for key, value in temp.items():
+    #             try:
+    #                 dataframe_result[key].append(value)
+    #             except:
+    #                 pass                                # 키값이 'driver'인 경우 오류 생략을 위함    
+
+    # def toPandas():
+    #     try:
+    #         result = pd.DataFrame(dataframe_result)
+    #         xlxs_dir=r'C:\Users\user\Desktop\result.xlsx'
+    #         with pd.ExcelWriter(xlxs_dir) as writer:
+    #             result.to_excel(writer)
+    #         driver.quit()
+    #         return False
+    #     except Exception as e:
+    #         msg = ctypes.windll.user32.MessageBoxW(None, str(e) + "\n재시도 하시겠습니까?", "오류 발생", 1)
+    #         if msg != 1:
+    #             return False
+    #     return True
 
 
-# Pandas preferences, extract 'temp.xlsx'
-addr_column = "A"
-addr_to_num = sum([v*26**(len(addr_column)-i-1) for i, v in enumerate([ord(s)-64 for s in addr_column])])-1
-data = pd.read_excel(r'C:\Users\user\Desktop\temp.xlsx', header=None)
-df = data.iloc[:,addr_to_num]
-address_list = df.values.tolist()
+    
 
-# Structure list
-dataframe_result = fn.LandInfoStructure.dataframe_result
-dataframe_tobeappended = fn.LandInfoStructure.dataframe_tobeappended
+a = TaskManager()
 
-# Selenium setting
-driver = webdriver.Chrome(executable_path=r'C:\chromedriver.exe')
-dataframe_tobeappended['driver'] = driver
+a.print()
 
-# Copy address list to dataframe
-for address in address_list:
-    dataframe_tobeappended['original_address'] = address
-    dataframe_tobeappended = fn.StringHandler.addressToDict(dataframe_tobeappended)
-    dataframe_tobeappended = fn.Action.isplSearchAndAlert(dataframe_tobeappended)
 
-    for key, value in dataframe_tobeappended.items():
-        try:
-            dataframe_result[key].append(value)
-        except:
-            pass                                # 키값이 'driver'인 경우 오류 생략을 위함
-
-# Save result with Pandas
-result = pd.DataFrame(dataframe_result)
-xlxs_dir=r'C:\Users\user\Desktop\result.xlsx'
-with pd.ExcelWriter(xlxs_dir) as writer:
-    result.to_excel(writer)
+# setWebdrive()
+# setPandas()
+# executeTasks()
+# while toPandas():
+#     pass
