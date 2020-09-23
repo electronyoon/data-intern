@@ -25,18 +25,28 @@ class LandInfoStructure:
         'seereal_result' : []           # 씨:리얼 검색/일치 여부 ({0, 1})
     }
 
-class StringHandler:
-    def addressToDict(text):
-        dictionary = {
-            'original_address' : text,
-            'sgg' : "",
-            'umd' : "",
-            'san' : False,
-            'first' : "",
-            'second' : ""
-        }
+    # Temporary list to be appended to dataframe_result.
+    dataframe_tobeappended = {
+        'driver' : "",                  # Selenium 구동에 필요한 driver 객체를 저장하는 곳
+        'original_address' : "",
+        'sgg' : "",
+        'umd' : "",
+        'san' : "",
+        'first' : "",
+        'second' : "",
+        'toji_result' : "",
+        'building_result' : "",
+        'plan_result' : "",
+        'publicprice_result' : "",
+        'naver_result' : "",
+        'kakao_result' : "",
+        'sreeet_result' : "",
+        'seereal_result' : "",
+    }
 
-        for s in text.split(" "):
+class StringHandler:
+    def addressToDict(dictionary):
+        for s in dictionary['original_address'].split(" "):
             if s[-1:] == "구":
                 dictionary['sgg'] = s
             elif s[-1:] == "동":
@@ -50,79 +60,61 @@ class StringHandler:
             elif "-" in s:
                 dictionary['first'] = s[:s.find("-")]
                 dictionary['second'] = s[s.find("-")+1:]
-                        
+
         return(dictionary)
 
 class Action:
-    def isplSearch(driver, dictionary):
-        def sggSelect(string): driver.find_element_by_id("sggnm").send_keys(string)
-        def umdSelect(string): driver.find_element_by_id("umdnm").send_keys(string)
-        def sanSelect(boolean):
-            if boolean:
-                driver.find_element_by_id("selectLandType_").send_keys('산')
-            else:
-                driver.find_element_by_id("selectLandType_").send_keys('일반')
-        def firstSelect(string):
-            driver.find_element_by_xpath('''//*[@title="본번"]''').clear()
-            driver.find_element_by_xpath('''//*[@title="본번"]''').send_keys(dictionary['first'])
-
-        def secondSelect(string):
-            driver.find_element_by_xpath('''//*[@title="부번"]''').clear()
-            driver.find_element_by_xpath('''//*[@title="부번"]''').send_keys(dictionary['second'])
-            driver.find_element_by_xpath('''//*[@title="부번"]''').send_keys(Keys.ENTER)
-
-        sggSelect(dictionary['sgg'])
-        time.sleep(0.5)
-        umdSelect(dictionary['umd'])
-        time.sleep(0.5)
-        sanSelect(dictionary['san'])
-        time.sleep(0.5)
-        firstSelect(dictionary['first'])
-        time.sleep(0.5)
-        secondSelect(dictionary['second'])
-
-    def isplVerifySearch():
-        
-
-    def isplPopupCheck(driver, dictionary):
-        dictionary['toji_bool'] = 0
-        dictionary['building_bool'] = 0
-        dictionary['plan_bool'] = 0
-        dictionary['publicprice_bool'] = 0
-
-        while not driver.switch_to.alert.text:
-            time.sleep(0.1)
-
-        alert_text = driver.switch_to.alert.text
-        
-        if not '토지정보' in alert_text:
-            dictionary['toji_bool'] = 1
-        elif not '건축물정보' in alert_text:
-            dictionary['building_bool'] = 1
-        elif not '토지이용계획' in alert_text:
-            dictionary['plan_bool'] = 1
-        elif not '공시지가' in alert_text:
-            dictionary['publicprice_bool'] = 1
+    def isplSearchAndAlert(dictionary):
+        dictionary['driver'].get('http://kras.seoul.go.kr/land_info/info/baseInfo/baseInfo.do')
+        dictionary['driver'].find_element_by_id("sggnm").send_keys(dictionary['sgg'])
+        time.sleep(0.1)
+        dictionary['driver'].find_element_by_id("umdnm").send_keys(dictionary['umd'])
+        time.sleep(0.1)
+        if dictionary['san']:
+            dictionary['driver'].find_element_by_id("selectLandType_").send_keys('산')
         else:
-            print("Alert Failed!")
-        driver.switch_to.alert.accept()
-        
+            dictionary['driver'].find_element_by_id("selectLandType_").send_keys('일반')
+        time.sleep(0.1)
+        dictionary['driver'].find_element_by_xpath('''//*[@title="본번"]''').clear()
+        time.sleep(0.1)
+        dictionary['driver'].find_element_by_xpath('''//*[@title="본번"]''').send_keys(dictionary['first'])
+        time.sleep(0.1)
+        dictionary['driver'].find_element_by_xpath('''//*[@title="부번"]''').clear()
+        time.sleep(0.1)
+        dictionary['driver'].find_element_by_xpath('''//*[@title="부번"]''').send_keys(dictionary['second'])
+        time.sleep(0.1)
+        dictionary['driver'].find_element_by_xpath('''//*[@title="부번"]''').send_keys(Keys.ENTER)
+        time.sleep(0.1)
+
+        sleepcounter = 0
+        while True:
+            try:
+                dictionary['driver'].switch_to_alert()
+                break
+            except:
+                sleepcounter += 0.1
+                if sleepcounter < 10: time.sleep(0.1)
+                else: break
+                
+        if '토지정보' in dictionary['driver'].switch_to_alert().text:
+            dictionary['toji_result'] = 0
+        if '건축물정보' in dictionary['driver'].switch_to_alert().text:
+            dictionary['building_result'] = 0
+        if '토지이용계획' in dictionary['driver'].switch_to_alert().text:
+            dictionary['plan_result'] = 0
+        if '공시지가' in dictionary['driver'].switch_to_alert().text:
+            dictionary['publicprice_result'] = 0
+
+        try:
+            dictionary['driver'].switch_to.alert.accept()
+        except:
+            print("alert doesn't exist: " + dictionary['original_address'])
+
         return(dictionary)
 
-    def isplVerify(text, dictionary):
-        count = 0
-        for s in text.split(" "):
-            if dictionary['sgg'] in s:
-                count += 1
-            elif dictionary['umd'] in s:
-                count += 1
-            elif '산' in s and dictionary['san'] == True:
-                count += 1
-            elif dictionary['first'] in s and dictionary['second'] in s :
-                count += 1
-            else:
-                print("Failed!: " + s)
-            
-            
+    def isplVerifyAndReSearch(dictionary):
+        
+        isplSearchAndAlert(dictionary)
 
+            
 address = "서울특별시 종로구 당주동 160"

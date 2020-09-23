@@ -8,21 +8,20 @@ from selenium import webdriver
 
 import freenote as fn
 
-driver = webdriver.Chrome(executable_path=r'C:\chromedriver.exe')
-driver.get('http://kras.seoul.go.kr/land_info/info/baseInfo/baseInfo.do')
+# driver.get('http://kras.seoul.go.kr/land_info/info/baseInfo/baseInfo.do')
 
-dataframe_result = fn.LandInfoStructure.dataframe_result
-address = "서울특별시 종로구 당주동 160"
+# dataframe_result = fn.LandInfoStructure.dataframe_result
+# address = "서울특별시 종로구 당주동 160"
 
-d = fn.StringHandler.addressToDict(address)
-print(d)
-r = fn.Action.isplSearch(driver, d)
+# d = fn.StringHandler.addressToDict(address)
+# print(d)
+# r = fn.Action.isplSearch(driver, d)
 
-# address_pieces = fn.StringHandler.addressToDict(address)
-# fn.Action.isplSearch(driver, )
-# address_ispl_info = fn.Action.isplPopupCheck(driver, d)
-# d = fn.Action.isplVerify(address, d)
-print(r)
+# # address_pieces = fn.StringHandler.addressToDict(address)
+# # fn.Action.isplSearch(driver, )
+# # address_ispl_info = fn.Action.isplPopupCheck(driver, d)
+# # d = fn.Action.isplVerify(address, d)
+# print(r)
 
 # def naverSearch(dict):
 #     driver.get('http://map.naver.com/')
@@ -72,32 +71,35 @@ print(r)
 # #     driver.quit()
 
 
+# Pandas preferences, extract 'temp.xlsx'
+addr_column = "A"
+addr_to_num = sum([v*26**(len(addr_column)-i-1) for i, v in enumerate([ord(s)-64 for s in addr_column])])-1
+data = pd.read_excel(r'C:\Users\user\Desktop\temp.xlsx', header=None)
+df = data.iloc[:,addr_to_num]
+address_list = df.values.tolist()
 
+# Structure list
+dataframe_result = fn.LandInfoStructure.dataframe_result
+dataframe_tobeappended = fn.LandInfoStructure.dataframe_tobeappended
 
+# Selenium setting
+driver = webdriver.Chrome(executable_path=r'C:\chromedriver.exe')
+dataframe_tobeappended['driver'] = driver
 
+# Copy address list to dataframe
+for address in address_list:
+    dataframe_tobeappended['original_address'] = address
+    dataframe_tobeappended = fn.StringHandler.addressToDict(dataframe_tobeappended)
+    dataframe_tobeappended = fn.Action.isplSearchAndAlert(dataframe_tobeappended)
 
+    for key, value in dataframe_tobeappended.items():
+        try:
+            dataframe_result[key].append(value)
+        except:
+            pass                                # 키값이 'driver'인 경우 오류 생략을 위함
 
-
-   
-
-# addr_column = "A"
-# addr_to_num = sum([v*26**(len(addr_column)-i-1) for i, v in enumerate([ord(s)-64 for s in addr_column])])-1
-# data = pd.read_excel(r'C:\Users\user\Desktop\temp.xlsx', header=None)
-# df = data.iloc[:,addr_to_num]
-# givenaddr_list = df.values.tolist()
-
-# driver.get('http://kras.seoul.go.kr/land_info/info/baseInfo/baseInfo.do')
-# for given_addr in givenaddr_list:
-#     abc_separate_passthrough = seperateBungee(given_addr)
-#     completeFields(abc_separate_passthrough)
-#     abc_popup_passthrough = interpretPopupResult(abc_separate_passthrough)
-    
-#     for key, value in abc_popup_passthrough.items():
-#         data_list[key].append(abc_popup_passthrough[key])
-
-#     # naverSearch(data_list)
-
-# raw_data = pd.DataFrame(data_list)
-# xlxs_dir=r'C:\Users\user\Desktop\result.xlsx'
-# with pd.ExcelWriter(xlxs_dir) as writer:
-#     raw_data.to_excel(writer)
+# Save result with Pandas
+result = pd.DataFrame(dataframe_result)
+xlxs_dir=r'C:\Users\user\Desktop\result.xlsx'
+with pd.ExcelWriter(xlxs_dir) as writer:
+    result.to_excel(writer)
