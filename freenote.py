@@ -1,60 +1,72 @@
+import ctypes
+import pandas as pd
+import time
+
+from urllib.request import urlopen
+from urllib.request import Request
+from urllib import parse
+from urllib.error import HTTPError
+
+from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.keys import Keys
 
-import time
-
 class LandInfoStructure:
-    def __init__(self):
-        # Final result to be used as dataframe.
-        self.dataframe_result = {
-            'original_address' : [],        # 원본 주소
-            'sgg' : [],                     # 구
-            'umd' : [],                     # 동, 가
-            'san' : [],                     # 산 여부 ({산, ''}})
-            'first' : [],                   # 본번
-            'second' : [],                  # 부번
-            'toji_result' : [],             # 일사편리-토지정보 검색 여부 ({0, 1})
-            'building_result' : [],         # 일사편리-건축물정보 검색 여부 ({0, 1})
-            'plan_result' : [],             # 일사편리-토지이용계획 검색 여부 ({0, 1})
-            'publicprice_result' : [],      # 일사편리-개별공시지가 검색 여부 ({0, 1})
-            'naver_result' : [],            # 네이버지도 검색/일치 여부 ({0, 1})
-            'kakao_result' : [],            # 카카오지도 검색/일치 여부 ({0, 1})
-            'sreeet_result' : [],           # 도로명주소 검색/일치 여부 ({0, 1})
-            'seereal_result' : []           # 씨:리얼 검색/일치 여부 ({0, 1})
+    """Final result to be used as dataframe."""
+    _dataframe_result = {
+        'original_address' : [],        # 원본 주소
+        'sgg' : [],                     # 구
+        'umd' : [],                     # 동, 가
+        'san' : [],                     # 산 여부 ({산, ''}})
+        'first' : [],                   # 본번
+        'second' : [],                  # 부번
+        'toji_result' : [],             # 일사편리-토지정보 검색 여부 ({0, 1})
+        'building_result' : [],         # 일사편리-건축물정보 검색 여부 ({0, 1})
+        'plan_result' : [],             # 일사편리-토지이용계획 검색 여부 ({0, 1})
+        'publicprice_result' : [],      # 일사편리-개별공시지가 검색 여부 ({0, 1})
+        'naver_result' : [],            # 네이버지도 검색/일치 여부 ({0, 1})
+        'kakao_result' : [],            # 카카오지도 검색/일치 여부 ({0, 1})
+        'sreeet_result' : [],           # 도로명주소 검색/일치 여부 ({0, 1})
+        'seereal_result' : []           # 씨:리얼 검색/일치 여부 ({0, 1})
+    }
+
+    # Temporary list to be appended to dataframe_result.
+    _dataframe_tobeappended = {
+        'driver' : "",                  # Selenium 구동에 필요한 driver 객체를 저장하는 곳
+        'original_address' : "",
+        'sgg' : "",
+        'umd' : "",
+        'san' : "",
+        'first' : "",
+        'second' : "",
+        'toji_result' : "",
+        'building_result' : "",
+        'plan_result' : "",
+        'publicprice_result' : "",
+        'naver_result' : "",
+        'kakao_result' : "",
+        'sreeet_result' : "",
+        'seereal_result' : "",
+    }
+
+    _xpath_info = {
+        'sgg' : '''//*[@id="sggnm"]''',
+        'umd' : '''//*[@id="umdnm"]''',
+        'san' : '''//*[@id="selectLandType_"]''',
+        'first' : '''//*[@title="본번"]''',
+        'second' : '''//*[@title="부번"]'''
+    }
+
+class DataHandler (LandInfoStructure):
+    def to_dataframe(self):
+        return {
+            
         }
 
-        # Temporary list to be appended to dataframe_result.
-        self.dataframe_tobeappended = {
-            'driver' : "",                  # Selenium 구동에 필요한 driver 객체를 저장하는 곳
-            'original_address' : "",
-            'sgg' : "",
-            'umd' : "",
-            'san' : "",
-            'first' : "",
-            'second' : "",
-            'toji_result' : "",
-            'building_result' : "",
-            'plan_result' : "",
-            'publicprice_result' : "",
-            'naver_result' : "",
-            'kakao_result' : "",
-            'sreeet_result' : "",
-            'seereal_result' : "",
-        }
-
-        self.xpath_info = {
-            'sgg' : '''//*[@id="sggnm"]''',
-            'umd' : '''//*[@id="umdnm"]''',
-            'san' : '''//*[@id="selectLandType_"]''',
-            'first' : '''//*[@title="본번"]''',
-            'second' : '''//*[@title="부번"]'''
-        }
-
-class StringHandler:
-    def addressToDict(dictionary):
+    def address_to_dict(dictionary):
         for s in dictionary['original_address'].split(" "):
             if s[-1:] == "구":
                 dictionary['sgg'] = s
@@ -72,9 +84,13 @@ class StringHandler:
 
         return(dictionary)
 
-class Action:
-    def isplSearchAndAlert(dictionary):
-        def selectXpath():
+class SeleniumTaskHandler (LandInfoStructure):
+    def set_webdriver():
+        driver = webdriver.Chrome(executable_path=r'C:\chromedriver.exe')
+        dataframe_tobeappended['driver'] = driver
+
+    def ispl_search_and_alert(dictionary):
+        def select_xpath():
             # 비우기 시도 (text field 외 오류 발생)
             for key, value in xpath_info.items():
                 try:
@@ -95,7 +111,7 @@ class Action:
                     print("Xpath select error, " + key + ", " + value + ", Error message: " + str(e))
                 time.sleep(0.1)
 
-        def verifyXpath():
+        def verify_xpath():
             counter = 0
             def method():
                 counter += 1
@@ -152,5 +168,26 @@ class Action:
     #     for _ in range(3):
     #         isplSearchAndAlert(dictionary)
 
-            
-address = "서울특별시 종로구 당주동 160"
+class PandasTaskHandler:
+    address_list = []
+    
+    def set_pandas():
+        addr_column = "A"
+        addr_to_num = sum([v*26**(len(addr_column)-i-1) for i, v in enumerate([ord(s)-64 for s in addr_column])])-1
+        data = pd.read_excel(r'C:\Users\user\Desktop\temp.xlsx', header=None)
+        df = data.iloc[:,addr_to_num]
+        address_list = df.values.tolist()
+
+    def to_pandas():
+        try:
+            result = pd.DataFrame(dataframe_result)
+            xlxs_dir=r'C:\Users\user\Desktop\result.xlsx'
+            with pd.ExcelWriter(xlxs_dir) as writer:
+                result.to_excel(writer)
+            driver.quit()
+            return False
+        except Exception as e:
+            msg = ctypes.windll.user32.MessageBoxW(None, str(e) + "\n재시도 하시겠습니까?", "오류 발생", 1)
+            if msg != 1:
+                return False
+        return True

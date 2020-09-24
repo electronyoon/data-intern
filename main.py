@@ -1,13 +1,3 @@
-import ctypes
-
-from urllib.request import urlopen
-from urllib.request import Request
-from urllib import parse
-from urllib.error import HTTPError
-
-import pandas as pd
-from selenium import webdriver
-
 import freenote as fn
 
 # def naverSearch(dict):
@@ -45,64 +35,20 @@ import freenote as fn
 #     return dict
 
 
+def main():
+    execute = TaskManager()
+    print(execute.dataframe_result)
 
-class TaskManager (fn.LandInfoStructure, fn.Action):
-    def __init__(self):
-        super().__init__()
+    for address in address_list:
+    temp = dataframe_tobeappended
+    temp['original_address'] = address
+    temp = fn.StringHandler.addressToDict(temp)
+    temp = fn.Action.isplSearchAndAlert(temp)
+    for key, value in temp.items():
+        try:
+            dataframe_result[key].append(value)
+        except:
+            pass                                # 키값이 'driver'인 경우 오류 생략을 위함    
 
-    print("loaded!")
-
-    def print():
-        print(self.__class__.dataframe_result)
-
-
-    # def setWebdrive():
-    #     driver = webdriver.Chrome(executable_path=r'C:\chromedriver.exe')
-    #     dataframe_tobeappended['driver'] = driver
-    
-    # def setPandas():
-    #     addr_column = "A"
-    #     addr_to_num = sum([v*26**(len(addr_column)-i-1) for i, v in enumerate([ord(s)-64 for s in addr_column])])-1
-    #     data = pd.read_excel(r'C:\Users\user\Desktop\temp.xlsx', header=None)
-    #     df = data.iloc[:,addr_to_num]
-    #     address_list = df.values.tolist()
-    
-    # def executeTasks():
-    #     for address in address_list:
-    #         temp = dataframe_tobeappended
-    #         temp['original_address'] = address
-    #         temp = fn.StringHandler.addressToDict(temp)
-    #         temp = fn.Action.isplSearchAndAlert(temp)
-    #         for key, value in temp.items():
-    #             try:
-    #                 dataframe_result[key].append(value)
-    #             except:
-    #                 pass                                # 키값이 'driver'인 경우 오류 생략을 위함    
-
-    # def toPandas():
-    #     try:
-    #         result = pd.DataFrame(dataframe_result)
-    #         xlxs_dir=r'C:\Users\user\Desktop\result.xlsx'
-    #         with pd.ExcelWriter(xlxs_dir) as writer:
-    #             result.to_excel(writer)
-    #         driver.quit()
-    #         return False
-    #     except Exception as e:
-    #         msg = ctypes.windll.user32.MessageBoxW(None, str(e) + "\n재시도 하시겠습니까?", "오류 발생", 1)
-    #         if msg != 1:
-    #             return False
-    #     return True
-
-
-    
-
-a = TaskManager()
-
-a.print()
-
-
-# setWebdrive()
-# setPandas()
-# executeTasks()
-# while toPandas():
-#     pass
+if __name__ == "__main__":
+    main()
