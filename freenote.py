@@ -8,6 +8,7 @@ from urllib import parse
 from urllib.error import HTTPError
 
 from selenium import webdriver
+import chromedriver_autoinstaller
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -16,7 +17,7 @@ from selenium.webdriver.common.keys import Keys
 
 class LandInfoStructure:
     """Final result to be used as dataframe."""
-    _dataframe_result = {
+    __dataframe_result = {
         'original_address' : [],        # 원본 주소
         'sgg' : [],                     # 구
         'umd' : [],                     # 동, 가
@@ -33,26 +34,8 @@ class LandInfoStructure:
         'seereal_result' : []           # 씨:리얼 검색/일치 여부 ({0, 1})
     }
 
-    # Temporary list to be appended to dataframe_result.
-    _dataframe_tobeappended = {
-        'driver' : "",                  # Selenium 구동에 필요한 driver 객체를 저장하는 곳
-        'original_address' : "",
-        'sgg' : "",
-        'umd' : "",
-        'san' : "",
-        'first' : "",
-        'second' : "",
-        'toji_result' : "",
-        'building_result' : "",
-        'plan_result' : "",
-        'publicprice_result' : "",
-        'naver_result' : "",
-        'kakao_result' : "",
-        'sreeet_result' : "",
-        'seereal_result' : "",
-    }
-
-    _xpath_info = {
+    """Xpath required for indexing website."""
+    __xpath_info = {
         'sgg' : '''//*[@id="sggnm"]''',
         'umd' : '''//*[@id="umdnm"]''',
         'san' : '''//*[@id="selectLandType_"]''',
@@ -61,12 +44,18 @@ class LandInfoStructure:
     }
 
 class DataHandler (LandInfoStructure):
-    def to_dataframe(self):
+    chromedriver_autoinstaller.install()
+    driver = webdriver.Chrome()
+
+    def __init__(self):
+        self.temp_dataframe_result = __dataframe_result
+
+    def toDataframe(self):
         return {
             
         }
 
-    def address_to_dict(dictionary):
+    def addressSeperate(dictionary):
         for s in dictionary['original_address'].split(" "):
             if s[-1:] == "구":
                 dictionary['sgg'] = s
@@ -84,12 +73,12 @@ class DataHandler (LandInfoStructure):
 
         return(dictionary)
 
-class SeleniumTaskHandler (LandInfoStructure):
-    def set_webdriver():
+class SeleniumTaskHandler:
+    def webdriverAssign():
         driver = webdriver.Chrome(executable_path=r'C:\chromedriver.exe')
         dataframe_tobeappended['driver'] = driver
 
-    def ispl_search_and_alert(dictionary):
+    def isplSearchAndAlert(dictionary):
         def select_xpath():
             # 비우기 시도 (text field 외 오류 발생)
             for key, value in xpath_info.items():
@@ -171,14 +160,14 @@ class SeleniumTaskHandler (LandInfoStructure):
 class PandasTaskHandler:
     address_list = []
     
-    def set_pandas():
+    def setPandas():
         addr_column = "A"
         addr_to_num = sum([v*26**(len(addr_column)-i-1) for i, v in enumerate([ord(s)-64 for s in addr_column])])-1
         data = pd.read_excel(r'C:\Users\user\Desktop\temp.xlsx', header=None)
         df = data.iloc[:,addr_to_num]
         address_list = df.values.tolist()
 
-    def to_pandas():
+    def toPandas():
         try:
             result = pd.DataFrame(dataframe_result)
             xlxs_dir=r'C:\Users\user\Desktop\result.xlsx'
