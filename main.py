@@ -48,7 +48,7 @@ def main():
         try:
             dataframe_result[key].append(value)
         except:
-            pass                                # 키값이 'driver'인 경우 오류 생략을 위함    
+            pass                                    # 키값이 'driver'인 경우 오류 생략을 위함
 
 if __name__ == "__main__":
     main()
