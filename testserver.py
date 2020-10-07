@@ -12,7 +12,7 @@ class TkinterFrame(Frame):
         self.pack(fill=BOTH, expand=True)
 
         # 프레임 지정
-        self.topframe = Frame(self, height=100)
+        self.topframe = Frame(self, height=200)
         self.topframe.pack(side=TOP, fill="both")
         self.leftframe = Frame(self)
         self.leftframe.pack(side=LEFT, fill="both", expand=True)
@@ -41,23 +41,33 @@ class TkinterFrame(Frame):
         self.btn_excel = Button(self.topframe, text="찾아보기...", width=10, command=self.getExcelPath)
         self.btn_excel.place(relwidth=0.1, height=20, relx=0.85, y=45)
 
-        # system log창 지정
+        # log창 지정
         self.strvar_syslog = StringVar()
         self.strvar_syslog.set("")
-        self.entry_left = Entry(self.leftframe, textvariable=self.strvar_syslog, state='disabled', justify='center')
+
+        self.entry_bottom = Entry(self.topframe, textvariable=self.strvar_syslog, state='disabled', justify='center')
+        self.entry_bottom.place(relwidth=0.9, height=100, relx=0.05, y=70)
+
+        # table창 지정
+        self.entry_left = Entry(self.leftframe, state='disabled', justify='center')
         self.entry_left.pack(fill="both", expand=True, padx=10, pady=10)
+
         self.entry_right = Entry(self.rightframe, state='disabled', justify='center')
         self.entry_right.pack(fill="both", expand=True, padx=10, pady=10)
 
         # proceed
         self.btn_proceed = Button(self.topframe, text="Proceed", width=10, command=self.searchISPL)
-        self.btn_proceed.place(relwidth=0.1, y=75)
-
+        self.btn_proceed.place(relwidth=0.1, height=20, relx=0.85, y=175)
 
         window.mainloop()   
+        
+    def showDialog(self, dialog):
+        log_history = self.strvar_syslog.get()
+        self.strvar_syslog.set(log_history + dialog + "\n")
 
     def getDriverPath(self):
         driver_path = filedialog.askopenfilename(initialdir="/", title="Open file", filetypes=[("all files","*.*")])
+        self.showDialog("loaded.")
         if driver_path == "":
             pass
         else:
@@ -76,15 +86,10 @@ class TkinterFrame(Frame):
             else:
                 messagebox.showinfo("경고", "xlsx 확장자가 아닙니다.")
 
-    def showDialog(self, dialog):
-        self.strvar_syslog.set(dialog + "\n")
-        print("완료!")
 
     def searchISPL(self):
-        driver = webdriver.Chrome(self.strvar_driver.get_stringvar())
-        print(driver)
-        print(self.strvar_driver.get_stringvar())
-        
+        driver = webdriver.Chrome(self.strvar_driver.get())
+        return self.strvar_driver.get()
         
 
 # class DataHandler (LandInfoStructure):
@@ -106,8 +111,6 @@ def main():
     window = Tk()
     window.geometry("640x480+100+100")
     app = TkinterFrame(window)
-    app.showDialog("안녕하세요!")
-
 
 if __name__ == "__main__":
     main()
