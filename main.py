@@ -40,10 +40,11 @@ def main():
     print(execute.dataframe_result)
 
     for address in address_list:
-    temp = dataframe_tobeappended
-    temp['original_address'] = address
-    temp = fn.StringHandler.addressToDict(temp)
-    temp = fn.Action.isplSearchAndAlert(temp)
+        temp = dataframe_tobeappended
+        temp['original_address'] = address
+        temp = fn.StringHandler.addressToDict(temp)
+        temp = fn.Action.isplSearchAndAlert(temp)
+        
     for key, value in temp.items():
         try:
             dataframe_result[key].append(value)
