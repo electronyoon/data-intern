@@ -1,5 +1,6 @@
 from selenium import webdriver
 
+import tkinter
 from tkinter import *
 from tkinter import scrolledtext
 from tkinter import messagebox
@@ -71,6 +72,9 @@ class TkinterFrame(Frame):
         self.landUsageEnt = Entry(self.window, textvariable=self.landUsageStr, justify=CENTER, width=7, state=DISABLED)
         self.landUsageEnt.grid(row=6, column=0, sticky='e')
 
+        # 작업버튼 지정
+        self.proceedBtn = Button(self.window, text="proceed", command=lambda: self.OnButtonClick(3))
+        self.proceedBtn.grid(row=7, column=1, columnspan=2, sticky='e')
 
         # log창 지정
         self.logStr = StringVar()
@@ -110,10 +114,10 @@ class TkinterFrame(Frame):
                 )
 
 
-    def taskLog(self, dialog):
-        self.scrolled_log['state'] = 'normal'
-        self.scrolled_log.insert(tk.END, dialog + "\n")
-        self.scrolled_log['state'] = 'disabled'
+    def statusLog(self, dialog):
+        self.logScr['state'] = 'normal'
+        self.logScr.insert(tkinter.END, dialog + "\n")
+        self.logScr['state'] = 'disabled'
 
     def getDriverPath(self):
         self.statusLog("Getting chromedriver's executable path...")
@@ -122,20 +126,21 @@ class TkinterFrame(Frame):
             pass
         else:
             if "exe" in driver_path:
-                self.strvar_driver.set(driver_path)
+                self.driverStr.set(driver_path)
                 self.statusLog("Chromedriver loaded.")
+                self.driverBtn = tkinter.DISABLED
             else:
                 self.statusLog("Chromedriver loading failed. Unsupported extension.")
                 messagebox.showinfo("경고", "exe 확장자가 아닙니다.")
 
     def getExcelPath(self):
-        self.statusLog("Getting task-target spreadsheet's path...")
+        self.statusLog("Getting target spreadsheet's path...")
         excel_path = filedialog.askopenfilename(initialdir="/", title="Open file", filetypes=[("all files","*.*")])
         if excel_path == "":
             pass
         else:
             if "xlsx" in excel_path:
-                self.strvar_excel.set(excel_path)
+                self.excelStr.set(excel_path)
                 self.statusLog("Spreadsheet loaded.")
             else:
                 self.statusLog("Spreadsheet loading failed. Unsupported extension.")
@@ -144,7 +149,7 @@ class TkinterFrame(Frame):
     def searchISPL(self):
         self.statusLog("Starting task session...")
         try:
-            driver = webdriver.Chrome(self.strvar_driver.get())
+            driver = webdriver.Chrome(self.driverStr.get())
             self.statusLog("Starting chromedriver...")
             self.taskcounter = 0
         except:
