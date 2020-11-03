@@ -9,6 +9,7 @@ import os
 from PIL import Image, ImageDraw, ImageFont
 import pandas as pd
 
+import time
 
 
 
@@ -21,9 +22,8 @@ def removeBlanks(s):
     return s
 
 def getFilename(s):
-    dotindex = s[-5:].find(".")
-    if dotindex:
-        s_filename = s[:dotindex]
+    if "." in s:
+        s_filename = s[:s.find(s.split(".")[-1])-1]
     else:
         return False
 
@@ -31,7 +31,7 @@ def getFilename(s):
 
 def getExt(s):
     if "." in s:
-        s_ext = s.split(".")[-1:]
+        s_ext = s[s.find(s.split(".")[-1]):]
     else:
         return False
 
@@ -39,25 +39,23 @@ def getExt(s):
 
     return s_ext
 
-def whetherFileExists(s):
-    pass
-
 def tifToJpg(f, opath, spath):
+    try:
+        os.mkdir(spath)
+    except:
+        pass
+
     if "tif" in str(getExt(f)).lower():
         im = Image.open(opath + "\\" + f)
         out = im.convert("RGB")
         rf = f[:-3] + "jpeg"
-        try:
-            out.save(spath + "\\" + rf, "JPEG", quality=100)
-        except:
-            os.mkdir(spath)
-            out.save(spath + "\\" + rf, "JPEG", quality=100)
+        out.save(spath + "\\" + rf, "JPEG", quality=100)
         
         return rf
     
 def jpgToCarved(f, opath, spath):
     try:
-        image = Image.open(opath + f)
+        image = Image.open(opath + "\\" + f)
         draw = ImageDraw.Draw(image)
 
         # String handler
@@ -70,36 +68,55 @@ def jpgToCarved(f, opath, spath):
         color = 'rgb(0, 0, 0)' # black color
 
         draw.text((x, y), message, fill=color, font=font)
-        image.save(spath + f)
+        image.save(spath + "\\" + f)
     except Exception as e:
         print(e)
         return False
 
-def pdToXlsx(d, f, p):
+def pdToXlsx(d, n, p):
     try:
         data = pd.DataFrame({ key:pd.Series(value) for key, value in d.items() })
-        xlxs_dir = p + "\\" + f + ".xlsx"
+        xlxs_dir = p + "\\" + str(n) + ".xlsx"
         with pd.ExcelWriter(xlxs_dir) as writer:
-            raw_data.to_excel(writer)
+            data.to_excel(writer)
     except Exception as e:
         print(e)
         return False
 
+    
 
 
 
 if __name__ == '__main__':
-    workpath = r"C:\Users\user\Desktop\강남구_c\\"
+    time.sleep(1800)
+
+    workpath = r"C:\Users\user\Desktop\강서구 도면정보"
     dwgtrigger = False
 
     if dwgtrigger:
         pass
     else:
-        dir_list = [d for d in os.listdir(workpath)]
+        dir_list = []
+        for d in os.listdir(workpath):
+            if os.path.isdir(workpath + "\\" + d):
+                dir_list.append(d)
+        fail_list = {}
+        for d in dir_list:
+            fail_list[d] = []
+        
         for d in dir_list:
             for f in os.listdir(workpath + "\\" + str(d)):
                 rf = tifToJpg(f, workpath + "\\" + str(d), workpath + "\\" + str(d) + "\\" + "result")
-                print(rf)
+                jpgToCarved(rf, workpath + "\\" + str(d) + "\\" + "result", workpath + "\\" + str(d) + "\\" + "result")
+                
+                rf = [d[:-5] for d in os.listdir(workpath + "\\" + str(d) + "\\" + "result")]
+
+                if getFilename(f) not in rf and len(f) > 10:
+                    fail_list[d].append(f)
+
+        pdToXlsx(fail_list, "exceptions", workpath)
+                
+            
 
 # dataframe_result = {}
 # for d in dirl:
