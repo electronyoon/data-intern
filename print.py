@@ -30,10 +30,8 @@ def getFilename(s):
     return s_filename
 
 def getExt(s):
-    dotindex = s[-5:].find(".")
-
-    if dotindex:
-        s_ext = s[dotindex + 1:]
+    if "." in s:
+        s_ext = s.split(".")[-1:]
     else:
         return False
 
@@ -45,24 +43,18 @@ def whetherFileExists(s):
     pass
 
 def tifToJpg(f, opath, spath):
-    if getExt(f).lower() == "tif":
-        try:
-            im = Image.open(opath + f)
-        except Exception as e:
-            print(e)
-            return False
+    if "tif" in str(getExt(f)).lower():
+        im = Image.open(opath + "\\" + f)
         out = im.convert("RGB")
         rf = f[:-3] + "jpeg"
         try:
-            out.save(spath + rf, "JPEG", quality=100)
+            out.save(spath + "\\" + rf, "JPEG", quality=100)
         except:
             os.mkdir(spath)
-            out.save(spath + rf, "JPEG", quality=100)
-    else:
-        return False
-
-    return rf
-
+            out.save(spath + "\\" + rf, "JPEG", quality=100)
+        
+        return rf
+    
 def jpgToCarved(f, opath, spath):
     try:
         image = Image.open(opath + f)
@@ -104,14 +96,10 @@ if __name__ == '__main__':
         pass
     else:
         dir_list = [d for d in os.listdir(workpath)]
-        opath_list = [os.path.realpath(workpath + d) for d in dir_list]
-
-        for opath in opath_list:
-            for f in os.listdir(opath):
-                spath = os.path.realpath(opath + "\\result")
-                print(f)
-                tifToJpg(f, opath, spath)
-
+        for d in dir_list:
+            for f in os.listdir(workpath + "\\" + str(d)):
+                rf = tifToJpg(f, workpath + "\\" + str(d), workpath + "\\" + str(d) + "\\" + "result")
+                print(rf)
 
 # dataframe_result = {}
 # for d in dirl:

@@ -1,4 +1,11 @@
 
+import subprocess
+import matplotlib.pyplot as plt
+import ezdxf
+from ezdxf.addons.drawing import RenderContext, Frontend, matplotlib
+from ezdxf.addons.drawing.matplotlib import MatplotlibBackend
+import os
+import re
 
 
 workpath = r"C:\Users\user\Desktop\test\\"
