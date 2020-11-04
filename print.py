@@ -46,15 +46,21 @@ def tifToJpg(f, opath, spath):
         pass
 
     if "tif" in str(getExt(f)).lower():
-        im = Image.open(opath + "\\" + f)
-        out = im.convert("RGB")
-        rf = f[:-3] + "jpeg"
-        out.save(spath + "\\" + rf, "JPEG", quality=100)
-        
+        try: 
+            im = Image.open(opath + "\\" + f)
+            out = im.convert("RGB")
+            rf = getFilename(f) + ".jpeg"
+            out.save(spath + "\\" + rf, "JPEG", quality=100)
+            return rf
+        except: 
+            rf = False
+            return rf
+    else:
+        rf = False
         return rf
     
 def jpgToCarved(f, opath, spath):
-    try:
+    if f:
         image = Image.open(opath + "\\" + f)
         draw = ImageDraw.Draw(image)
 
@@ -69,8 +75,7 @@ def jpgToCarved(f, opath, spath):
 
         draw.text((x, y), message, fill=color, font=font)
         image.save(spath + "\\" + f)
-    except Exception as e:
-        print(e)
+    else:
         return False
 
 def pdToXlsx(d, n, p):
@@ -88,9 +93,8 @@ def pdToXlsx(d, n, p):
 
 
 if __name__ == '__main__':
-    time.sleep(1800)
 
-    workpath = r"C:\Users\user\Desktop\강서구 도면정보"
+    workpath = r"C:\Users\user\Desktop\강서구 도면정보\\"
     dwgtrigger = False
 
     if dwgtrigger:
@@ -104,33 +108,23 @@ if __name__ == '__main__':
         for d in dir_list:
             fail_list[d] = []
         
-        for d in dir_list:
-            for f in os.listdir(workpath + "\\" + str(d)):
-                rf = tifToJpg(f, workpath + "\\" + str(d), workpath + "\\" + str(d) + "\\" + "result")
-                jpgToCarved(rf, workpath + "\\" + str(d) + "\\" + "result", workpath + "\\" + str(d) + "\\" + "result")
-                
-                rf = [d[:-5] for d in os.listdir(workpath + "\\" + str(d) + "\\" + "result")]
+        try:
+            for d in dir_list:
+                c = 0
+                tifopenpath = workpath + "\\" + d + "\\"
+                for f in os.listdir(tifopenpath):
+                    jpgresultpath = tifopenpath + "\\result\\"
 
-                if getFilename(f) not in rf and len(f) > 10:
-                    fail_list[d].append(f)
+                    rf = tifToJpg(f, tifopenpath, jpgresultpath)
+                    jpgToCarved(rf, jpgresultpath, jpgresultpath)
+                    
+                    rfl = [getFilename(d) for d in os.listdir(jpgresultpath)]
+                    if getFilename(f) not in rfl and len(f) > 10:
+                        fail_list[d].append(f)
+                    c += 1
+                    print(str(len(os.listdir(tifopenpath))) + "개 중 " + str(c) + "개 진행중입니다.")
+        except Exception as e:
+            print(e)
 
         pdToXlsx(fail_list, "exceptions", workpath)
                 
-            
-
-# dataframe_result = {}
-# for d in dirl:
-#     dataframe_result[d] = []
-
-# for d in dirl:
-#     path = r"C:\Users\user\Desktop\강남구\\" + str(d) + "\\exceptiontifs"
-#     counter = 0
-#     for infile in os.listdir(path):
-#         try:
-#             if infile[-3:].lower() == "tif":
-
-#         except:
-#             dataframe_result[d].append(infile)
-#         counter += 1
-#         print(str(len(os.listdir(path))) + "개 중 " + str(counter) + "개 처리중입니다.")
-    
