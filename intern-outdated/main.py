@@ -15,9 +15,11 @@ def removeBlanks(s):
     return s
 
 def compareList(l):
-    # remove list with unexisting ratio
+    # remove list with abnormal ratio
     for i in l:
         if not isinstance(i[1], str):
+            l.remove(i)
+        if i[1] <= 0:
             l.remove(i)
     
     # compare dates
