@@ -6,6 +6,7 @@ googlePhotoPath = r"C:\Users\user\Pictures\Saved Pictures\\"
 macPhotoPath = r"C:\Users\user\Pictures\iCloud Photos\Photos\\"
 
 
+# find special texts with given filename
 def detectDuplicate(s):
     if '1).' in s:
         return True
@@ -24,6 +25,9 @@ def detectDuplicate(s):
     
     return False
 
+# compare two different photos' metadata
+# and return with latest metadata
+# => [filename, original date, latitude, longitude]
 def compareDuplicate(gp_list, mp_list):
     def gps2coord(t):
         d, m, s = t
